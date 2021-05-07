@@ -19,7 +19,7 @@ const S = (statement) => ([memory, output]) => {
     let { variable, initializer } = statement
     return [{ ...memory, [variable]: E(initializer)(memory) }, output]
   } else if (statement.constructor === PrintStatement) {
-    let { argument } = statement
+    let { argument } = statement  
     //console.log("The statement is PRINT")
     output.push(E(argument)(memory))
     return [memory, output]
@@ -27,6 +27,11 @@ const S = (statement) => ([memory, output]) => {
     console.log("Aissignment is called!")
     let { target, source } = statement
     return [{ ...memory, [target]: E(source)(memory)}, output]
+  } else if (statement.constructor === Ternary){
+      let {condition, value1, value2} = statement
+      if (C(condition)){
+        return [{ ...memory, [variable]: E(value1)(memory) }, output]
+      }
   } else if (statement.constructor === WhileStatement) {
     console.log("WhileLoop detected!")
     let test = statement.test
@@ -47,14 +52,15 @@ const S = (statement) => ([memory, output]) => {
       return S(whileLoop(test, body))(w)
     }else{
       return w
-    }
-
+    }  
   } else if (statement.constructor === FunctionDeclaration) {
+        let {name, parameters, body} = statement
+      return [{ ...memory, [name]: statement}, output]
   }
 }
 
 const E = (expression) => (memory) => {
-  if (typeof expression === "number") {
+  if (typeof expression === "number" || typeof expression === "boolean") {
     return expression
   } else if (typeof expression == "string") {
     const i = expression
@@ -76,6 +82,16 @@ const E = (expression) => (memory) => {
         return E(left)(memory) % E(right)(memory)
       case "**":
         return E(left)(memory) ** E(right)(memory)
+      default:
+        return E(C(expression)(memory))(memory)
+    }
+  } else if (expression.constructor === Ternary){
+    console.log("Bella: The expressin is Ternary!")
+    let {condition, value1, value2} = expression
+    if (C(condition)(memory)){
+      return E(value1)(memory)
+    } else{
+      return E(value2)(memory)
     }
   }
 }
@@ -165,10 +181,17 @@ class Unary {
   }
 }
 
+class Ternary {
+  constructor(condition, value1, value2){
+    Object.assign(this, {condition, value1, value2})
+  }
+}
+
 const program = (s) => new Program(s)
 const vardec = (i, e) => new VariableDeclaration(i, e)
 const print = (e) => new PrintStatement(e)
 const whileLoop = (c, b) => new WhileStatement(c, b)
+const ifelse = (c, a, b) => new Ternary(c, a, b) //this creates a ternary operator
 const plus = (x, y) => new Binary("+", x, y)
 const minus = (x, y) => new Binary("-", x, y)
 const times = (x, y) => new Binary("*", x, y)
@@ -183,10 +206,11 @@ const greatereq = (x, y) => new Binary(">=", x, y)
 const and = (x, y) => new Binary("&&", x, y)
 const or = (x, y) => new Binary("||", x, y)
 const assign = (x,y) => new Assignment(x,y)
+const fun = (n, p, b) => new FunctionDeclaration(n, p, b)
 
 //console.log(interpret(program([vardec("x", 2), print("x")])))
 
-console.log(
+/*console.log(
   interpret(
     program([
       vardec("x", 3),
@@ -196,7 +220,7 @@ console.log(
  )
 
 
-/*console.log(
+console.log(
   P(
     program([
       vardec("x", 3),
@@ -208,10 +232,6 @@ console.log(
 )
 
 console.log(
-  "from Rachit!"
-)*/
-
-/*console.log(
   P(
     program([
       vardec("x", 17),
@@ -222,13 +242,24 @@ console.log(
     ])
   )
 )
-/*
+
 console.log(
   interpret(
     program([
       vardec("x", 23),
       vardec("y", 34),
-      print()
+      fun("MyFunction", ["x", "y"], [print("function is created!")])
     ])
   )
 )*/
+
+console.log(
+  interpret(
+    program([
+      vardec("x", 64),
+      vardec("y", 56),
+      assign("z", ifelse(less("x","y"), power("x",2), plus("x","y"))),
+      print("z")
+    ])
+  )
+)

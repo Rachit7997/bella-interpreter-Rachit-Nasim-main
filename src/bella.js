@@ -27,11 +27,6 @@ const S = (statement) => ([memory, output]) => {
     console.log("Aissignment is called!")
     let { target, source } = statement
     return [{ ...memory, [target]: E(source)(memory)}, output]
-  } else if (statement.constructor === Ternary){
-      let {condition, value1, value2} = statement
-      if (C(condition)){
-        return [{ ...memory, [variable]: E(value1)(memory) }, output]
-      }
   } else if (statement.constructor === WhileStatement) {
     console.log("WhileLoop detected!")
     let test = statement.test

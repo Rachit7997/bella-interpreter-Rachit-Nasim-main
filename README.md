@@ -85,32 +85,23 @@ type State = Memory x File
 
 ```
 Tests
-Expected Value [10, false, 4583720, -4583630, 206265375, 20, 2.9974064041865856e-8, false,
-                true, false, false, true, true, true]
-console.log (
-  interpret (
-      program ([
-          vardec("x", 10),
-          print("x"),
-          whileLoop(greatereq("x", assign("x", plus("x", 5)))),
-          print(ternary(eq("x", minus("x", 5)), true, false)),
-          vardec("y", 4583675),
-          vardec("z", 45),
-          print(plus("y", "z")),
-          print(minus("z", "y")),
-          print(times("y", "z")),
-          print(remainder("y", "z")),
-          print(power(76, -4)),
-          print(eq("y", "z")),
-          print(noteq("y", "z")),
-          print(less("y", "z")),
-          print(lesseq("y", "z")),
-          print(greater("y", "z")),
-          print(greatereq("y", "z")),
-          assign("z", 10),
-          print(eq("z", 10))
-          func("multiply", ["p", "q"], times("p", "q"))
-      ])
+Expected Output: [ 4096, false, true, false, 140 ]
+
+console.log(
+  interpret(
+    program([
+      vardec("x", 64),
+      vardec("y", 76),
+      assign("z", ifelse(less("x","y"), power("x",2), plus("x","y"))),
+      print("z"),
+      vardec("t", true),
+      assign("f", not("t")),
+      print("f"),
+      print("t"),
+      print(not("t")),
+      fun("addition", ["a","b"], [assign("c", plus("a","b")), print("c")]),
+      call("addition", ["x", "y"])
+    ])
   )
 )
 ```

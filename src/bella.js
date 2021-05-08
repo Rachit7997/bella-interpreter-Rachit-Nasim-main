@@ -5,45 +5,30 @@ function interpret(program) {
 const P = (program) => {
   let statements = program.body
   let w = [{}, []]
-  //console.log("bella: Program execution is about to begin!")
   for (let s of statements) {
     w = S(s)(w)
   }
-  console.log("bella: Program is executed!")
-  console.log("global memory scope:", w[0])
   return w[1]
 }
 
 const S = (statement) => ([memory, output]) => {
-  console.log("Statement Detected!")
   if (statement.constructor === VariableDeclaration) {
     let { variable, initializer } = statement
     return [{ ...memory, [variable]: E(initializer)(memory) }, output]
   } else if (statement.constructor === PrintStatement) {
     let { argument } = statement  
-    //console.log("The statement is PRINT")
     output.push(E(argument)(memory))
     return [memory, output]
   } else if (statement.constructor === Assignment) {
-    console.log("Aissignment is called!")
     let { target, source } = statement
     return [{ ...memory, [target]: E(source)(memory)}, output]
   } else if (statement.constructor === WhileStatement) {
-    console.log("WhileLoop detected!")
     let test = statement.test
     let body = statement.body
     let w = [memory, output]
     if(C(test)(memory)){
-      //console.log(`Body ${body}`)
-      //console.log(`body[0] ${body[0]}`)
-      //console.log(`body[1] ${body[1]}`)
-      //console.log(typeof(body))
       for (let i=0; i<body.length; i++){
-        console.log("In side the while loop")
-        //console.log("s is",body[i])
-        //s.toString()
         w = S(body[i])([memory, output])
-        console.log(w) 
       }
       return S(whileLoop(test, body))(w)
     }else{
@@ -62,8 +47,6 @@ const S = (statement) => ([memory, output]) => {
       for (let i=0; i<f.body.length;i++){
         w = S(f.body[i])(w)
       }
-      console.log("Output after executing function:",output)
-      console.log("local memory scope:",statement.memory)
       return [memory, output] //local memory (statement.memory) is excluded due to the principle of 'scope'
   }
 }
@@ -78,7 +61,6 @@ const E = (expression) => (memory) => {
     if (expression.op === '-'){
       return -E(expression)(memory)
     } else{
-      console.log("not expression")
       return C(expression)(memory)
     }
     
@@ -101,7 +83,6 @@ const E = (expression) => (memory) => {
         return E(C(expression)(memory))(memory)
     }
   } else if (expression.constructor === Ternary){
-    console.log("Bella: The expressin is Ternary!")
     let {condition, value1, value2} = expression
     if (C(condition)(memory)){
       return E(value1)(memory)
@@ -138,9 +119,6 @@ const C = (condition) => (memory) => {
     }
   } else if (condition.constructor === Unary) {
     const { op, operand } = condition
-    /*console.log(`operand: ${operand}`)
-    let ans = !C(operand)(memory)
-    console.log(`ans: ${ans}`)*/
     return !C(E(operand)(memory))(memory)
   }
   // FOR YOU: HANDLE CALLS
@@ -151,13 +129,11 @@ const C = (condition) => (memory) => {
 class Program {
   constructor(body) {
     this.body = body
-    console.log("bella: Program body is created!")
   }
 }
 
 class VariableDeclaration {
   constructor(variable, initializer) {
-    console.log("bella: Variable is declared!")
     Object.assign(this, { variable, initializer })
   }
 }
@@ -183,7 +159,6 @@ class PrintStatement {
 
 class WhileStatement {
   constructor(test, body) {
-    console.log("While Loop is created!")
     Object.assign(this, { test, body })
   }
 }

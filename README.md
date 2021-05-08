@@ -109,6 +109,7 @@ console.log (
           print(greatereq("y", "z")),
           assign("z", 10),
           print(eq("z", 10))
+          func("multiply", ["p", "q"], times("p", "q"))
       ])
   )
 )
